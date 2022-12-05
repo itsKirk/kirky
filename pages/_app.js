@@ -1,4 +1,3 @@
-import Artist from "../components/Artist";
 import { SearchContextProvider } from "../contexts/SearchContext";
 import MainLayout from "../layouts/MainLayout";
 import "../styles/globals.css";

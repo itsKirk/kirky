@@ -79,7 +79,9 @@ export const getStaticProps = async (context) => {
 };
 const Album = ({ data }) => {
   console.log(data);
+  const [albumInfo, setAlbumInfo] = useState(data);
   const [duration, setDuration] = useState("");
+  const [error, setError] = useState({ error: "null" });
   const [fav, setFav] = useState(false);
   const [displayAlbums, setDisplayAlbums] = useState([]);
   const convertMilliSeconds = (timeDuration) => {
@@ -93,21 +95,43 @@ const Album = ({ data }) => {
     return hours + " hours, " + minutes + " minutes & " + seconds + " seconds.";
   };
   useEffect(() => {
-    const getAlbums = () => {
-      let range = data.artistAlbums.items.length;
-      let nums = new Set();
-      while (nums.size < 5) {
-        nums.add(Math.floor(Math.random() * (range - 1 + 1) + 1));
+    if (albumInfo) {
+      try {
+        setAlbumInfo(albumInfo);
+        const getAlbums = () => {
+          let range = albumInfo.artistAlbums.items.length;
+          let nums = new Set();
+          while (nums.size < 5) {
+            nums.add(Math.floor(Math.random() * (range - 1 + 1) + 1));
+          }
+          let albumsToShow = [];
+          for (let i = 0; i < [...nums].length; i++) {
+            albumsToShow.push(albumInfo.artistAlbums.items[[...nums][i]]);
+          }
+          setDisplayAlbums(albumsToShow);
+          console.log(displayAlbums);
+        };
+        getAlbums();
+        if (albumInfo.album) {
+          let lengths = albumInfo.album.tracks.items.map((item) => {
+            return item.duration_ms;
+          });
+          let sum = lengths.reduce((previousValue, currentValue) => {
+            return previousValue + currentValue;
+          });
+          setDuration(convertMilliSeconds(sum));
+        }
+      } catch (error) {
+        setError(error);
+        console.log(error);
       }
-      let albumsToShow = [];
-      for (let i = 0; i < [...nums].length; i++) {
-        albumsToShow.push(data.artistAlbums.items[[...nums][i]]);
-      }
-      setDisplayAlbums(albumsToShow);
-      console.log(displayAlbums);
-    };
-    getAlbums();
-  }, []);
+    } else {
+      setError({ error: "Error fetching data" });
+      setAlbums({ albums: "null" });
+      console.log(error);
+    }
+  }, [albumInfo]);
+
   const convertToChartTime = (timeDuration) => {
     var milliseconds = parseInt((timeDuration % 1000) / 100),
       seconds = Math.floor((timeDuration / 1000) % 60),
@@ -118,17 +142,6 @@ const Album = ({ data }) => {
     seconds = seconds < 10 ? "0" + seconds : seconds;
     return minutes + "." + seconds;
   };
-  useEffect(() => {
-    if (data.album) {
-      let lengths = data.album.tracks.items.map((item) => {
-        return item.duration_ms;
-      });
-      let sum = lengths.reduce((previousValue, currentValue) => {
-        return previousValue + currentValue;
-      });
-      setDuration(convertMilliSeconds(sum));
-    }
-  }, []);
   return (
     <div className="w-full flex justify-start items-center flex-col h-screen overflow-hidden">
       <Header title={"Albums"} />
@@ -138,32 +151,38 @@ const Album = ({ data }) => {
             className=" h-full w-full "
             style={{
               backgroundImage:
-                data.album.images.length > 0
-                  ? "url(" + data.album.images[0].url + ")"
+                albumInfo.album.images.length > 0
+                  ? "url(" + albumInfo.album.images[0].url + ")"
                   : 'url("/default.jpg")',
               backgroundSize: "cover",
               backgroundPosition: "center",
             }}></div>
         </div>
-        <div className="h-full w-full flex flex-col justify-end">
+        <div className="h-full text-x w-full flex flex-col justify-end">
           <p className="uppercase tracking-wide font-extrabold py-1">Album</p>
-          <h1>{data.album.name}</h1>
+          <h1
+            style={{
+              fontSize: albumInfo.album.name.length < 20 ? "45px" : "36px",
+              textTransform: "uppercase",
+            }}>
+            {albumInfo.album.name}
+          </h1>
           <div className="flex justify-start items-center space-x-2 py-2 font-bold">
             <div
               className="rounded-full h-10 w-10 px-1"
               style={{
                 backgroundImage:
-                  data.artist.images.length > 0
-                    ? "url(" + data.artist.images[0].url + ")"
+                  albumInfo.artist.images.length > 0
+                    ? "url(" + albumInfo.artist.images[0].url + ")"
                     : 'url("/default.jpg")',
                 backgroundSize: "cover",
                 backgroundPosition: "center",
               }}></div>
-            <p className="px-1">{data.artist.name}</p>
-            <p className="px-1">{data.album.release_date.slice(0, 4)}</p>
+            <p className="px-1">{albumInfo.artist.name}</p>
+            <p className="px-1">{albumInfo.album.release_date.slice(0, 4)}</p>
             <p className="px-1">
-              {data.album.tracks.total}{" "}
-              {data.album.tracks.total > 1 ? "songs" : "song"},{" "}
+              {albumInfo.album.tracks.total}{" "}
+              {albumInfo.album.tracks.total > 1 ? "songs" : "song"},{" "}
               <span
                 style={{
                   fontFamily: "Century Gothic",
@@ -207,7 +226,7 @@ const Album = ({ data }) => {
             <div className=" pb-1 w-full h-[2px]" />
             <div className="bg-secondary w-full h-[2px]" />
           </div>
-          {data.tracks.tracks.map((track, index) => (
+          {albumInfo.tracks.tracks.map((track, index) => (
             <div
               key={track.id}
               className="w-full flex justify-between group py-2 items-center hover:bg-primary/40 hover:rounded-[5px]">
@@ -223,7 +242,7 @@ const Album = ({ data }) => {
                 <div>
                   <div>{track.name}</div>
                   <div className="font-bold text-[10px]">
-                    {data.artist.name}
+                    {albumInfo.artist.name}
                   </div>
                 </div>
               </div>
@@ -238,7 +257,7 @@ const Album = ({ data }) => {
         </div>
         <div className="w-1/2 h-full overflow-auto px-2 ">
           <div className="w-full flex justify-between items-center">
-            <p className=" font-extrabold">More by {data.artist.name}</p>
+            <p className=" font-extrabold">More by {albumInfo.artist.name}</p>
             <a
               href="#"
               className="uppercase tracking-wide hover:underline text-xs">

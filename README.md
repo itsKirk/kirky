@@ -1,6 +1,6 @@
-### Kirky Music 
+# Kirky Music 
 ## Application for streaming music Online
-# Technologies used
+### Technologies used
 1. Spotify 
 2. NextJs
 3. Tailwind CSS

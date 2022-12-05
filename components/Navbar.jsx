@@ -38,7 +38,7 @@ function Navbar() {
         }
     }
     return (
-        <div className='fixed w-full h-[80px] px-2 '>
+        <div className=' w-full h-[80px] px-2 absolute '>
             <div className='flex justify-between'>
                 <Image className='hidden sm:block sm:rounded-[50%] h-[80px] w-[80px] cursor-pointer md:h-[100px] md:w-[100px] hover:scale-105 duration-500' src={logo} alt='logo'
                     onClick={() => router.push('/')} />

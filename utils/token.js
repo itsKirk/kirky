@@ -1,5 +1,5 @@
 const url = "https://accounts.spotify.com/api/token";
-const options = {
+ const options = {
   method: "POST",
   headers: {
     "Content-type": "application/x-www-form-urlencoded",
