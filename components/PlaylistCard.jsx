@@ -1,15 +1,14 @@
 import React from "react";
 import { FaPlay } from "react-icons/fa";
 
-const PlaylistCard = ({ playlist }) => {
+const PlaylistCard = ({ playlist, onClick }) => {
   return (
-    <div>
+    <div onClick={onClick}>
       <div className="w-[200px] h-[230px] cursor-pointer flex flex-col">
         <div
           className="w-full relative h-[200px] hover:rounded-lg grid hover:rotate-2 place-items-center group opacity-80 hover:opacity-50 duration-500"
           style={{
-            backgroundImage:
-              "url(" + playlist.images[0].url + ")",
+            backgroundImage: "url(" + playlist.images[0].url + ")",
             backgroundSize: "cover",
             backgroundPosition: "center",
           }}>

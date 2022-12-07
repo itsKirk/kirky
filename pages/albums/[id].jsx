@@ -1,27 +1,24 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import Image from "next/image";
 import React from "react";
 import { useEffect } from "react";
 import { useState } from "react";
 import Header from "../../components/Header";
-import { getToken } from "../../utils/token";
-import { BiPlay } from "react-icons/bi";
+import {
+  convertMilliSeconds,
+  getAlbum,
+  getArtist,
+  getArtistAlbums,
+  getAlbumTracks,
+  getNewReleases,
+} from "../../utils/helpers";
 import { MdFavorite, MdOutlineAccessTime } from "react-icons/md";
 import { SlOptions } from "react-icons/sl";
 import { FaPlay } from "react-icons/fa";
+import Track from "../../components/Track";
+import AlbumItem from "../../components/AlbumItem";
 export const getStaticPaths = async () => {
-  const token = await getToken();
-  const url = "https://api.spotify.com/v1/browse/new-releases";
-  const options = {
-    method: "GET",
-    headers: {
-      Authorization: "Bearer " + token,
-      "Content-Type": "application/json",
-    },
-  };
   try {
-    const response = await fetch(url, options);
-    const data = await response.json();
+    const data = await getNewReleases();
     const paths = data.albums.items.map((album) => {
       return {
         params: {
@@ -34,38 +31,21 @@ export const getStaticPaths = async () => {
       fallback: false,
     };
   } catch (error) {
-    console.log(error);
+    return {
+      params: {
+        id: "",
+        error,
+      },
+    };
   }
 };
 export const getStaticProps = async (context) => {
   const id = context.params.id;
-  const token = await getToken();
-  const options = {
-    method: "GET",
-    headers: {
-      Authorization: "Bearer " + token,
-      "Content-Type": "application/json",
-    },
-  };
-  console.log(token);
-  const albumUrl = "https://api.spotify.com/v1/albums/" + id;
-  const response = await fetch(albumUrl, options);
-  const albumData = await response.json();
+  const albumData = await getAlbum(id);
   const artistId = albumData.artists[0].id;
-  const artistUrl = "https://api.spotify.com/v1/artists/" + artistId;
-  const artistResponse = await fetch(artistUrl, options);
-  const artistData = await artistResponse.json();
-  const allAlbumsUrl =
-    "https://api.spotify.com/v1/artists/" + artistId + "/albums";
-  let tracksIds = albumData.tracks.items.map((item) => {
-    return item.id;
-  });
-  tracksIds = tracksIds.join(",");
-  const tracksUrl = "https://api.spotify.com/v1/tracks?ids=" + tracksIds;
-  const tracksResponse = await fetch(tracksUrl, options);
-  const tracksData = await tracksResponse.json();
-  const albumsResponse = await fetch(allAlbumsUrl, options);
-  const allAlbumsData = await albumsResponse.json();
+  const artistData = await getArtist(artistId);
+  const tracksData = await getAlbumTracks(id);
+  const allAlbumsData = await getArtistAlbums(artistId);
   return {
     props: {
       data: {
@@ -77,6 +57,7 @@ export const getStaticProps = async (context) => {
     },
   };
 };
+
 const Album = ({ data }) => {
   console.log(data);
   const [albumInfo, setAlbumInfo] = useState(data);
@@ -84,16 +65,7 @@ const Album = ({ data }) => {
   const [error, setError] = useState({ error: "null" });
   const [fav, setFav] = useState(false);
   const [displayAlbums, setDisplayAlbums] = useState([]);
-  const convertMilliSeconds = (timeDuration) => {
-    var milliseconds = parseInt((timeDuration % 1000) / 100),
-      seconds = Math.floor((timeDuration / 1000) % 60),
-      minutes = Math.floor((timeDuration / (1000 * 60)) % 60),
-      hours = Math.floor((timeDuration / (1000 * 60 * 60)) % 24);
-    hours = hours < 10 ? "0" + hours : hours;
-    minutes = minutes < 10 ? "0" + minutes : minutes;
-    seconds = seconds < 10 ? "0" + seconds : seconds;
-    return hours + " hours, " + minutes + " minutes & " + seconds + " seconds.";
-  };
+
   useEffect(() => {
     if (albumInfo) {
       try {
@@ -131,16 +103,8 @@ const Album = ({ data }) => {
       console.log(error);
     }
   }, [albumInfo]);
-
-  const convertToChartTime = (timeDuration) => {
-    var milliseconds = parseInt((timeDuration % 1000) / 100),
-      seconds = Math.floor((timeDuration / 1000) % 60),
-      minutes = Math.floor((timeDuration / (1000 * 60)) % 60),
-      hours = Math.floor((timeDuration / (1000 * 60 * 60)) % 24);
-    hours = hours < 10 ? "0" + hours : hours;
-    minutes = minutes < 10 ? "0" + minutes : minutes;
-    seconds = seconds < 10 ? "0" + seconds : seconds;
-    return minutes + "." + seconds;
+  const loadAlbum = (id) => {
+    console.log(id);
   };
   return (
     <div className="w-full flex justify-start items-center flex-col h-screen overflow-hidden">
@@ -226,33 +190,14 @@ const Album = ({ data }) => {
             <div className=" pb-1 w-full h-[2px]" />
             <div className="bg-secondary w-full h-[2px]" />
           </div>
-          {albumInfo.tracks.tracks.map((track, index) => (
-            <div
+          {albumInfo.tracks.items.map((track, index) => (
+            <Track
               key={track.id}
-              className="w-full flex justify-between group py-2 items-center hover:bg-primary/40 hover:rounded-[5px]">
-              <div className="flex justify-between group space-x-4 items-center ">
-                <div className="relative group flex justify-start items-center">
-                  <span className="absolute -bottom-3 hover:bg-secondary hover:rounded-full hidden group-hover:block">
-                    <BiPlay size={20} />
-                  </span>
-                  <span className="absolute   group-hover:hidden">
-                    {index + 1}
-                  </span>
-                </div>
-                <div>
-                  <div>{track.name}</div>
-                  <div className="font-bold text-[10px]">
-                    {albumInfo.artist.name}
-                  </div>
-                </div>
-              </div>
-              <div className="flex justify-between group items-center space-x-2">
-                <span className="hidden group-hover:block">
-                  <MdFavorite fill={fav ? "red" : "grey"} />
-                </span>
-                <div>{convertToChartTime(track.duration_ms)}</div>
-              </div>
-            </div>
+              name={albumInfo.artist.name}
+              fav={fav}
+              track={track}
+              index={index}
+            />
           ))}
         </div>
         <div className="w-1/2 h-full overflow-auto px-2 ">
@@ -266,16 +211,9 @@ const Album = ({ data }) => {
           </div>
           <div className="bg-secondary w-full h-[2px]" />
 
-          <div className="w-full h-[150px] p-3  flex justify-between items-center overflow-x-auto">
-            {displayAlbums.map((item) => (
-              <div
-                key={item.id}
-                className="h-[100px] w-[100px] px-2 hover:scale-110 hover:rounded-md hover:animate-pulse hover:rotate-2 hover:outline-2 cursor-pointer hover:outline-dotted hover:outline-primary duration-500 "
-                style={{
-                  backgroundImage: "url(" + item.images[0].url + ")",
-                  backgroundSize: "cover",
-                  backgroundPosition: "center",
-                }}></div>
+          <div className="w-auto h-[150px] p-3 grid grid-flow-col gap-3 overflow-y-hidden overflow-x-auto">
+            {albumInfo.artistAlbums.items.map((item) => (
+              <AlbumItem key={item.id} loadAlbum={loadAlbum} item={item} />
             ))}
           </div>
         </div>
