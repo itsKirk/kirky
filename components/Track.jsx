@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useContext } from "react";
 /* eslint-disable react-hooks/exhaustive-deps */
 import { convertToChartTime } from "../utils/helpers";
 import { BiPlay } from "react-icons/bi";

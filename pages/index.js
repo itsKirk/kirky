@@ -1,23 +1,12 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import Head from "next/head";
-import { createContext, useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import Header from "../components/Header";
 import Main from "../components/Main";
 import { SearchContext } from "../contexts/SearchContext";
-import { getToken } from "../utils/token";
+import { getNewReleases } from "../utils/helpers.js";
 export const getStaticProps = async () => {
-  const token = await getToken();
-  const url = "https://api.spotify.com/v1/browse/new-releases";
-  const options = {
-    method: "GET",
-    headers: {
-      Authorization: "Bearer " + token,
-      "Content-Type": "application/json",
-    },
-  };
   try {
-    const response = await fetch(url, options);
-    const newReleases = await response.json();
+    const newReleases = await getNewReleases();
     return {
       props: {
         newReleases,
@@ -25,10 +14,10 @@ export const getStaticProps = async () => {
       },
       revalidate: 1,
     };
-  } catch (Error) {
+  } catch (error) {
     return {
       props: {
-        Error,
+        Error: error,
       },
     };
   }
@@ -53,7 +42,6 @@ export default function Home({ newReleases, Error }) {
       setAlbums({ albums: null });
     }
   }, [newReleases]);
-
   return (
     <div className="w-full h-full">
       <Header />

@@ -20,3 +20,36 @@ export const getToken = async () => {
     return { error: error.message };
   }
 };
+export const getGetOptions = async () => {
+  try {
+    const response = await fetch(url, options);
+    const token = await response.json();
+    const getOptions = {
+      method: "GET",
+      headers: {
+        Authorization: "Bearer " + token.access_token,
+        "Content-Type": "application/json",
+      },
+    };
+    return getOptions;
+  } catch (error) {
+    return { error: error.message };
+  }
+};
+export const getPostOptions = async () => {
+  try {
+    const response = await fetch(url, options);
+    const token = await response.json();
+    const postOptions = {
+      method: "POST",
+      headers: {
+        Authorization: "Bearer " + token.access_token,
+        "Content-Type": "application/json",
+      },
+    };
+    return postOptions;
+  } catch (error) {
+    return { error: error.message };
+  }
+};
+

@@ -127,34 +127,33 @@ const Play = ({ thisListData }) => {
             </div>
           </div>
         </div>
-        <div className="w-full h-full overflow-auto px-2 ">
-          <div className="flex justify-center items-start">
-            <div className="flex w-full justify-between items-center">
-              <div className="uppercase tracking-wider font-bold text-sm space-x-4 flex justify-between">
-                <p>#</p>
-                <p>Title</p>
-              </div>
-              <div className="uppercase tracking-wider font-bold text-sm ">
-                ALBUM
-              </div>
-              <div className="uppercase tracking-wider font-bold text-sm ">
-                DATE ADDED
-              </div>
-              <div>
-                <MdOutlineAccessTime />
-              </div>
+        <div className="flex justify-center items-start mx-2 pb-2">
+          <div className="flex w-full justify-between items-center">
+            <div className="uppercase tracking-wider font-bold text-sm space-x-4 flex justify-between">
+              <p>#</p>
+              <p>Title</p>
+            </div>
+            <div className="uppercase tracking-wider font-bold text-sm ">
+              ALBUM
+            </div>
+            <div className="uppercase tracking-wider font-bold text-sm ">
+              DATE ADDED
+            </div>
+            <div className="mr-4">
+              <MdOutlineAccessTime />
             </div>
           </div>
+        </div>
+        <div className="bg-secondary w-full h-[2px]" />
+        <div className="w-full h-full overflow-auto px-2 ">
           <div>
             <div className=" pb-1 w-full h-[2px]" />
-            <div className="bg-secondary w-full h-[2px]" />
           </div>
-          {thisListData.tracks.items.map((track, index) => (
-            <PlaylistTrack
-              key={track.id}
-              track={track}
-              index={index}/>
-          ))}
+          <div className="pb-20">
+            {thisListData.tracks.items.map((track, index) => (
+              <PlaylistTrack key={track.id} track={track} index={index} />
+            ))}
+          </div>
         </div>
       </div>
     </div>

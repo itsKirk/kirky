@@ -1,5 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import React from "react";
+import React, { createContext } from "react";
 import { useEffect } from "react";
 import { useState } from "react";
 import Header from "../../components/Header";
@@ -57,33 +57,17 @@ export const getStaticProps = async (context) => {
     },
   };
 };
-
 const Album = ({ data }) => {
   console.log(data);
   const [albumInfo, setAlbumInfo] = useState(data);
   const [duration, setDuration] = useState("");
   const [error, setError] = useState({ error: "null" });
   const [fav, setFav] = useState(false);
-  const [displayAlbums, setDisplayAlbums] = useState([]);
 
   useEffect(() => {
     if (albumInfo) {
       try {
         setAlbumInfo(albumInfo);
-        const getAlbums = () => {
-          let range = albumInfo.artistAlbums.items.length;
-          let nums = new Set();
-          while (nums.size < 5) {
-            nums.add(Math.floor(Math.random() * (range - 1 + 1) + 1));
-          }
-          let albumsToShow = [];
-          for (let i = 0; i < [...nums].length; i++) {
-            albumsToShow.push(albumInfo.artistAlbums.items[[...nums][i]]);
-          }
-          setDisplayAlbums(albumsToShow);
-          console.log(displayAlbums);
-        };
-        getAlbums();
         if (albumInfo.album) {
           let lengths = albumInfo.album.tracks.items.map((item) => {
             return item.duration_ms;
@@ -103,8 +87,9 @@ const Album = ({ data }) => {
       console.log(error);
     }
   }, [albumInfo]);
-  const loadAlbum = (id) => {
-    console.log(id);
+  const loadAlbum = async (id) => {
+    const album = await getAlbum(id);
+    setAlbumInfo({ ...data, album, tracks: album.tracks });
   };
   return (
     <div className="w-full flex justify-start items-center flex-col h-screen overflow-hidden">
@@ -160,7 +145,8 @@ const Album = ({ data }) => {
       </div>
       <div className="w-full h-[70px]  mt-[90px]">
         <div className="py-4 px-16  w-full h-full space-x-4 flex items-center justify-start">
-          <div className="p-2 group hover:scale-110 duration-100 flex justify-center items-center w-12 h-12 bg-secondary rounded-full">
+          <div
+            className="p-2 group hover:scale-110 duration-100 flex justify-center items-center w-12 h-12 bg-secondary rounded-full">
             <FaPlay size={25} className="group-hover:rotate-[5deg]" />
           </div>
           <div

@@ -1,7 +1,7 @@
 import React from "react";
 import { BiPlay } from "react-icons/bi";
 import { format } from "date-fns";
-import { convertToChartTime } from "../../utils/helpers";
+import { convertToChartTime } from "../utils/helpers";
 const PlaylistTrack = (props) => {
   return (
     <div className="w-full grid auto-cols-max grid-cols-[33%_23%_22%_22%] group py-2 items-center hover:bg-primary/40 hover:rounded-[5px]">
